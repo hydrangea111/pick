@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>추첨 원장 · Draw Ledger</title>
+<title>무작위 추첨</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -66,7 +66,6 @@
     line-height: 1.6;
   }
 
-  /* ---- 스텝 카드 ---- */
   .step {
     background: var(--paper-raised);
     border: 1px solid var(--line-strong);
@@ -106,7 +105,6 @@
 
   .step.done .step-num { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
 
-  /* ---- 공용 요소 ---- */
   .hint { font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   .drop {
@@ -165,7 +163,7 @@
 
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 
-  /* ---- 등수 설정 ---- */
+  /* 등수 설정 */
   .tier-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
   .tier-table th {
     font-family: 'IBM Plex Mono', monospace;
@@ -203,7 +201,7 @@
   .tier-total.ok { color: #2f6b3a; }
   .tier-total.bad { color: var(--stamp-red); }
 
-  /* ---- 추첨 진행 ---- */
+  /* 추첨 진행 */
   .progress-line {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12.5px;
@@ -256,7 +254,7 @@
   }
   .seal::before { content: '●'; font-size: 8px; }
 
-  /* ---- 결과 표 ---- */
+  /* 결과 표 */
   table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
   table.result-table th {
     text-align: left; padding: 8px 10px;
@@ -309,8 +307,8 @@
 <div class="doc">
 
   <div class="masthead">
-    <h1>추첨 원장</h1>
-    <div class="sub">DRAW LEDGER<br>Web Crypto + drand 2원 난수 검증 추첨</div>
+    <h1>무작위 추첨</h1>
+    <div class="sub">DRAW LEDGER<br>Web Crypto API 단일 난수원 검증 추첨</div>
   </div>
 
   <!-- STEP 1: 업로드 -->
@@ -352,7 +350,7 @@
         <div class="progress-line" id="round1ProgressText">1차 추첨 대기 중</div>
         <div class="progress-bar-bg"><div class="progress-bar" id="round1Bar"></div></div>
         <div class="log-scroll"><table class="log-table" id="round1LogTable">
-          <thead><tr><th>#</th><th>시각</th><th>후보수</th><th>WebCrypto</th><th>drand</th><th>선택모델</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
+          <thead><tr><th>#</th><th>시각</th><th>후보수</th><th>WebCrypto</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
           <tbody></tbody>
         </table></div>
       </div>
@@ -362,7 +360,7 @@
         <div class="progress-line" id="round2ProgressText">2차 추첨 대기 중</div>
         <div class="progress-bar-bg"><div class="progress-bar" id="round2Bar"></div></div>
         <div class="log-scroll"><table class="log-table" id="round2LogTable">
-          <thead><tr><th>#</th><th>시각</th><th>등수</th><th>후보수</th><th>WebCrypto</th><th>drand</th><th>선택모델</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
+          <thead><tr><th>#</th><th>시각</th><th>등수</th><th>후보수</th><th>WebCrypto</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
           <tbody></tbody>
         </table></div>
       </div>
@@ -400,12 +398,9 @@
 <script>
 'use strict';
 
-/* =========================================================
-   상태
-========================================================= */
 let originalFile = null;
 let fileHashHex = null;
-let participants = [];      // 원본 열 + __rowId
+let participants = [];
 let idField = null;
 let rankTiers = [];         // [{label, count}]
 let winners = [];           // 1차 결과 (순서 없음)
@@ -416,9 +411,6 @@ let round2Logs = [];
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-/* =========================================================
-   유틸
-========================================================= */
 function bufToHex(buf) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -442,9 +434,7 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* =========================================================
-   STEP 1: 파일 업로드 / 파싱
-========================================================= */
+/* STEP 1: 파일 업로드 / 파싱 */
 const dropZone = $('#dropZone');
 const fileInput = $('#fileInput');
 
@@ -569,9 +559,7 @@ function renderFileSummary(dupKeys) {
       : '');
 }
 
-/* =========================================================
-   STEP 2: 등수 설정
-========================================================= */
+/* STEP 2: 등수 설정 */
 function initTierSection() {
   rankTiers = [{ label: '1등', count: 1 }];
   renderTierRows();
@@ -628,9 +616,7 @@ function updateTierTotal() {
   $('#startRound1Btn').disabled = !ok;
 }
 
-/* =========================================================
-   난수원 관리 (randomManager)
-========================================================= */
+/* 난수원 관리 (randomManager) */
 async function getWebCryptoSample() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return {
@@ -642,47 +628,11 @@ async function getWebCryptoSample() {
   };
 }
 
-const DRAND_URL = 'https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/public/latest';
-
-async function getDrandSample() {
-  try {
-    const res = await fetch(DRAND_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    if (!json.randomness) throw new Error('응답에 randomness 필드가 없습니다.');
-    return {
-      source: 'drand',
-      ok: true,
-      hex: json.randomness,
-      timestamp: nowISO(),
-      round: json.round,
-      signature: json.signature,
-      raw: json
-    };
-  } catch (e) {
-    return { source: 'drand', ok: false, error: e.message, timestamp: nowISO() };
-  }
-}
-
-// 5개 모델(여기선 소스 2개) 중 하나를 균등 선택 — rejection sampling
-function selectModel(okSamples) {
-  const n = okSamples.length;
-  if (n === 0) throw new Error('사용 가능한 난수원이 없습니다.');
-  if (n === 1) return { selectedIndex: 0, selectorByte: null, note: '단일 소스만 성공 - 모델 선택 절차 생략' };
-  let byte, idx;
-  const limit = 256 - (256 % n);
-  do {
-    byte = crypto.getRandomValues(new Uint8Array(1))[0];
-  } while (byte >= limit);
-  idx = byte % n;
-  return { selectedIndex: idx, selectorByte: byte };
-}
-
 async function deriveSeedHex(rawHex, context, counter) {
   return sha512Hex(rawHex + '|' + context + '|' + counter);
 }
 
-// n개 후보 중 균등 인덱스 선택 (rejection sampling, BigInt)
+// n개 중 인덱스 선택
 async function pickIndexUniform(n, seedProvider) {
   if (n <= 0) throw new Error('후보자가 없습니다.');
   const bitsNeeded = Math.max(1, Math.ceil(Math.log2(n)));
@@ -700,26 +650,19 @@ async function pickIndexUniform(n, seedProvider) {
   }
 }
 
-/* =========================================================
-   drawEngine: 개별 추첨 1회
-========================================================= */
+/* drawEngine: 개별 추첨 1회 */
 async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
   const wc = await getWebCryptoSample();
-  const dr = await getDrandSample();
-  const samples = [wc, dr];
-  const okSamples = samples.filter(s => s.ok);
 
-  if (okSamples.length === 0) {
-    throw new Error(`${roundLabel} #${drawNumber}: Web Crypto, drand 모두 실패하여 추첨을 진행할 수 없습니다.`);
+  if (!wc.ok) {
+    throw new Error(`${roundLabel} #${drawNumber}: Web Crypto 난수 생성에 실패하여 추첨을 진행할 수 없습니다.`);
   }
 
-  const modelSelect = selectModel(okSamples);
-  const selectedSample = okSamples[modelSelect.selectedIndex];
   const context = `${roundLabel}#${drawNumber}|n=${pool.length}`;
   const candidateCountBefore = pool.length;
 
   const index = await pickIndexUniform(pool.length, (counter) =>
-    deriveSeedHex(selectedSample.hex, context, counter)
+    deriveSeedHex(wc.hex, context, counter)
   );
 
   const winnerRow = pool.splice(index, 1)[0];
@@ -730,40 +673,31 @@ async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
     totalDraws,
     timestamp: nowISO(),
     candidateCountBefore,
-    samples: samples.map(s => ({
-      source: s.source, ok: s.ok,
-      hex: s.ok ? s.hex : undefined,
-      error: s.ok ? undefined : s.error,
-      round: s.round, signature: s.signature,
-      timestamp: s.timestamp
-    })),
-    modelSelection: modelSelect,
-    selectedSource: selectedSample.source,
+    samples: [{
+      source: wc.source, ok: wc.ok, hex: wc.hex, timestamp: wc.timestamp
+    }],
+    selectedSource: wc.source,
     finalIndex: index,
     winnerRowId: winnerRow.__rowId,
     winnerId: idField ? winnerRow[idField] : winnerRow.__rowId,
-    rawResponses: samples.filter(s => s.raw).map(s => ({ source: s.source, rawResponse: s.raw }))
+    rawResponses: [{ source: wc.source, rawResponse: wc.raw }]
   };
 
   return { winnerRow, log };
 }
 
-/* =========================================================
-   STEP 3: 1차 / 2차 추첨 실행
-========================================================= */
+/* STEP 3: 1차 / 2차 추첨 실행 */
 function shortHex(hex) { return hex ? (hex.slice(0, 10) + '…') : '—'; }
 
 function appendLogRow(tableSel, log, extra) {
   const tbody = $(tableSel + ' tbody');
   const tr = document.createElement('tr');
   const wc = log.samples.find(s => s.source === 'WebCrypto');
-  const dr = log.samples.find(s => s.source === 'drand');
   const wcCell = wc.ok ? `<span class="hex" title="${wc.hex}">${shortHex(wc.hex)}</span>` : `<span style="color:var(--error)">실패</span>`;
-  const drCell = dr.ok ? `<span class="hex" title="${dr.hex}">${shortHex(dr.hex)}</span>` : `<span style="color:var(--error)">실패</span>`;
 
   let cells = `<td>${log.drawNumber}/${log.totalDraws}</td><td>${log.timestamp.slice(11, 19)}</td>`;
   if (extra) cells += `<td>${escapeHtml(extra)}</td>`;
-  cells += `<td>${log.candidateCountBefore}</td><td>${wcCell}</td><td>${drCell}</td><td>${escapeHtml(log.selectedSource)}</td><td>${log.finalIndex}</td><td>${escapeHtml(String(log.winnerId))}</td>`;
+  cells += `<td>${log.candidateCountBefore}</td><td>${wcCell}</td><td>${log.finalIndex}</td><td>${escapeHtml(String(log.winnerId))}</td>`;
   tr.innerHTML = cells;
   tbody.appendChild(tr);
   tbody.parentElement.parentElement.scrollTop = tbody.parentElement.parentElement.scrollHeight;
@@ -863,9 +797,7 @@ async function runRound2() {
   renderResults();
 }
 
-/* =========================================================
-   STEP 4: 결과 & 리포트
-========================================================= */
+/* STEP 4: 결과 & 리포트 */
 function renderResults() {
   $('#resultSection').hidden = false;
   $('#drawSection').classList.add('done');
@@ -879,7 +811,7 @@ function renderResults() {
     ['등수 구성', rankTiers.map(t => `${t.label} ${t.count}명`).join(' · ')],
     ['1차 추첨 완료', round1Logs.length ? round1Logs[round1Logs.length - 1].timestamp : '—'],
     ['2차 추첨 완료', round2Logs.length ? round2Logs[round2Logs.length - 1].timestamp : '—'],
-    ['난수원', 'Web Crypto API, drand (League of Entropy quicknet)'],
+    ['난수원', 'Web Crypto API (crypto.getRandomValues)'],
     ['원본 SHA-256', fileHashHex.slice(0, 16) + '…']
   ].map(([label, value]) => `<div class="report-item"><div class="label">${escapeHtml(label)}</div><div class="value" style="font-size:13px">${escapeHtml(String(value))}</div></div>`).join('');
 
