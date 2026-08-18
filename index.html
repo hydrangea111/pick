@@ -345,6 +345,23 @@
     body { background: #fff; padding: 0; }
     .btn, .drop, #uploadSection, #tierSection, #drawSection { display: none !important; }
   }
+ .step,
+.report-item {
+  transform: none !important;
+}
+
+.step:nth-child(even),
+.report-item:nth-child(3n+1),
+.report-item:nth-child(3n+2),
+.report-item:nth-child(3n) {
+  transform: none !important;
+}
+
+.masthead::after {
+  height: 1px;
+  background: var(--ink);
+  background-image: none;
+}
 </style>
 </head>
 <body>
