@@ -79,7 +79,7 @@
     transform: rotate(.3deg);
   }
 
-  /* ---- 스텝 카드 ---- */
+  /* 스텝 카드 */
   .step {
     background: var(--paper-raised);
     border: 1px solid var(--line-strong);
@@ -123,7 +123,7 @@
 
   .step.done .step-num { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
 
-  /* ---- 공용 요소 ---- */
+  /* 공용 요소 */
   .hint { font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   .drop {
@@ -182,7 +182,7 @@
 
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 
-  /* ---- 등수 설정 ---- */
+  /* 등수 설정 */
   .tier-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
   .tier-table th {
     font-family: 'IBM Plex Mono', monospace;
@@ -220,7 +220,7 @@
   .tier-total.ok { color: #2f6b3a; }
   .tier-total.bad { color: var(--stamp-red); }
 
-  /* ---- 추첨 진행 ---- */
+  /* 추첨 진행 */
   .progress-line {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12.5px;
@@ -277,7 +277,7 @@
   }
   .seal::before { content: '●'; font-size: 8px; }
 
-  /* ---- 결과 표 ---- */
+  /*  결과 표 */
   table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
   table.result-table th {
     text-align: left; padding: 8px 10px;
@@ -425,9 +425,7 @@
 <script>
 'use strict';
 
-/* =========================================================
-   상태
-========================================================= */
+/* 상태 */
 let originalFile = null;
 let fileHashHex = null;
 let participants = [];      // 원본 열 + __rowId
@@ -441,9 +439,6 @@ let round2Logs = [];
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-/* =========================================================
-   유틸
-========================================================= */
 function bufToHex(buf) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -467,9 +462,7 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* =========================================================
-   STEP 1: 파일 업로드 / 파싱
-========================================================= */
+/* STEP 1: 파일 업로드 / 파싱 */
 const dropZone = $('#dropZone');
 const fileInput = $('#fileInput');
 
@@ -594,9 +587,7 @@ function renderFileSummary(dupKeys) {
       : '');
 }
 
-/* =========================================================
-   STEP 2: 등수 설정
-========================================================= */
+/* STEP 2: 등수 설정 */
 function initTierSection() {
   rankTiers = [{ label: '1등', count: 1 }];
   renderTierRows();
@@ -653,9 +644,7 @@ function updateTierTotal() {
   $('#startRound1Btn').disabled = !ok;
 }
 
-/* =========================================================
-   난수원 관리 (randomManager)
-========================================================= */
+/* 난수원 */
 async function getWebCryptoSample() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return {
@@ -671,7 +660,7 @@ async function deriveSeedHex(rawHex, context, counter) {
   return sha512Hex(rawHex + '|' + context + '|' + counter);
 }
 
-// n개 후보 중 균등 인덱스 선택 (rejection sampling, BigInt)
+// 인덱스 선택
 async function pickIndexUniform(n, seedProvider) {
   if (n <= 0) throw new Error('후보자가 없습니다.');
   const bitsNeeded = Math.max(1, Math.ceil(Math.log2(n)));
@@ -689,9 +678,7 @@ async function pickIndexUniform(n, seedProvider) {
   }
 }
 
-/* =========================================================
-   drawEngine: 개별 추첨 1회
-========================================================= */
+/* drawEngine: 개별 추첨 1회 */
 async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
   const wc = await getWebCryptoSample();
 
@@ -727,9 +714,7 @@ async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
   return { winnerRow, log };
 }
 
-/* =========================================================
-   STEP 3: 1차 / 2차 추첨 실행
-========================================================= */
+/* STEP 3: 1차 / 2차 추첨 실행 */
 function shortHex(hex) { return hex ? (hex.slice(0, 10) + '…') : '—'; }
 
 function appendLogRow(tableSel, log, extra) {
@@ -840,9 +825,7 @@ async function runRound2() {
   renderResults();
 }
 
-/* =========================================================
-   STEP 4: 결과 & 리포트
-========================================================= */
+/* STEP 4: 결과 & 리포트 */
 function renderResults() {
   $('#resultSection').hidden = false;
   $('#drawSection').classList.add('done');
