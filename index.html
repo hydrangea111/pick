@@ -29,8 +29,9 @@
   body {
     background: var(--paper);
     background-image:
-      linear-gradient(var(--line) 1px, transparent 1px);
-    background-size: 100% 32px;
+      radial-gradient(circle at 18% 8%, rgba(0,0,0,.025), transparent 40%),
+      radial-gradient(circle at 82% 92%, rgba(0,0,0,.02), transparent 45%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
     color: var(--ink);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
@@ -46,9 +47,18 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    border-bottom: 3px double var(--ink);
-    padding-bottom: 16px;
-    margin-bottom: 36px;
+    padding-bottom: 14px;
+    margin-bottom: 38px;
+    position: relative;
+  }
+
+  .masthead::after {
+    content: '';
+    position: absolute;
+    left: -2px; right: 6px; bottom: 0;
+    height: 6px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 8' preserveAspectRatio='none'%3E%3Cpath d='M0 5.2 C 40 6.5, 90 3.6, 140 5.1 S 240 6.8, 290 4.4 S 370 5.9, 400 4.8' stroke='%2320232c' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x;
+    background-size: 400px 6px;
   }
 
   .masthead h1 {
@@ -56,6 +66,8 @@
     font-weight: 600;
     font-size: 2.1em;
     letter-spacing: -.01em;
+    transform: rotate(-.4deg);
+    display: inline-block;
   }
 
   .masthead .sub {
@@ -64,15 +76,19 @@
     color: var(--ink-faint);
     text-align: right;
     line-height: 1.6;
+    transform: rotate(.3deg);
   }
 
+  /* ---- 스텝 카드 ---- */
   .step {
     background: var(--paper-raised);
     border: 1px solid var(--line-strong);
     border-radius: 3px;
     margin-bottom: 28px;
-    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    box-shadow: 2px 3px 0 rgba(0,0,0,.025);
+    transform: rotate(-.15deg);
   }
+  .step:nth-child(even) { transform: rotate(.18deg); box-shadow: -2px 3px 0 rgba(0,0,0,.025); }
 
   .step[hidden] { display: none; }
 
@@ -91,8 +107,10 @@
     color: var(--ink-faint);
     letter-spacing: .1em;
     border: 1px solid var(--line-strong);
-    border-radius: 2px;
+    border-radius: 2px 4px 2px 5px;
     padding: 3px 8px;
+    transform: rotate(-1deg);
+    display: inline-block;
   }
 
   .step-head h2 {
@@ -105,6 +123,7 @@
 
   .step.done .step-num { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
 
+  /* ---- 공용 요소 ---- */
   .hint { font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   .drop {
@@ -163,7 +182,7 @@
 
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 
-  /* 등수 설정 */
+  /* ---- 등수 설정 ---- */
   .tier-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
   .tier-table th {
     font-family: 'IBM Plex Mono', monospace;
@@ -201,7 +220,7 @@
   .tier-total.ok { color: #2f6b3a; }
   .tier-total.bad { color: var(--stamp-red); }
 
-  /* 추첨 진행 */
+  /* ---- 추첨 진행 ---- */
   .progress-line {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12.5px;
@@ -243,18 +262,22 @@
   .seal {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: .04em;
     color: var(--stamp-red);
-    border: 1.5px solid var(--stamp-red);
-    border-radius: 99px;
-    padding: 4px 12px 4px 8px;
+    border: 2px solid var(--stamp-red);
+    border-radius: 3px 9px 4px 8px / 8px 4px 9px 3px;
+    padding: 5px 13px 5px 9px;
+    transform: rotate(-2.5deg);
+    opacity: .88;
+    mix-blend-mode: multiply;
   }
   .seal::before { content: '●'; font-size: 8px; }
 
-  /* 결과 표 */
+  /* ---- 결과 표 ---- */
   table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
   table.result-table th {
     text-align: left; padding: 8px 10px;
@@ -279,7 +302,11 @@
     border-radius: 3px;
     padding: 12px 14px;
     background: var(--paper);
+    transform: rotate(-.3deg);
   }
+  .report-item:nth-child(3n+1) { transform: rotate(.35deg); }
+  .report-item:nth-child(3n+2) { transform: rotate(-.4deg); }
+  .report-item:nth-child(3n) { transform: rotate(.2deg); }
   .report-item .label { font-size: 10.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
   .report-item .value { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; }
 
@@ -308,7 +335,7 @@
 
   <div class="masthead">
     <h1>무작위 추첨</h1>
-    <div class="sub">DRAW LEDGER<br>Web Crypto API 단일 난수원 검증 추첨</div>
+    <div class="sub">DRAW LEDGER<br>Web Crypto API 이용 추첨</div>
   </div>
 
   <!-- STEP 1: 업로드 -->
@@ -398,9 +425,12 @@
 <script>
 'use strict';
 
+/* =========================================================
+   상태
+========================================================= */
 let originalFile = null;
 let fileHashHex = null;
-let participants = [];
+let participants = [];      // 원본 열 + __rowId
 let idField = null;
 let rankTiers = [];         // [{label, count}]
 let winners = [];           // 1차 결과 (순서 없음)
@@ -411,6 +441,9 @@ let round2Logs = [];
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+/* =========================================================
+   유틸
+========================================================= */
 function bufToHex(buf) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -434,7 +467,9 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* STEP 1: 파일 업로드 / 파싱 */
+/* =========================================================
+   STEP 1: 파일 업로드 / 파싱
+========================================================= */
 const dropZone = $('#dropZone');
 const fileInput = $('#fileInput');
 
@@ -559,7 +594,9 @@ function renderFileSummary(dupKeys) {
       : '');
 }
 
-/* STEP 2: 등수 설정 */
+/* =========================================================
+   STEP 2: 등수 설정
+========================================================= */
 function initTierSection() {
   rankTiers = [{ label: '1등', count: 1 }];
   renderTierRows();
@@ -616,7 +653,9 @@ function updateTierTotal() {
   $('#startRound1Btn').disabled = !ok;
 }
 
-/* 난수원 관리 (randomManager) */
+/* =========================================================
+   난수원 관리 (randomManager)
+========================================================= */
 async function getWebCryptoSample() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return {
@@ -632,7 +671,7 @@ async function deriveSeedHex(rawHex, context, counter) {
   return sha512Hex(rawHex + '|' + context + '|' + counter);
 }
 
-// n개 중 인덱스 선택
+// n개 후보 중 균등 인덱스 선택 (rejection sampling, BigInt)
 async function pickIndexUniform(n, seedProvider) {
   if (n <= 0) throw new Error('후보자가 없습니다.');
   const bitsNeeded = Math.max(1, Math.ceil(Math.log2(n)));
@@ -650,7 +689,9 @@ async function pickIndexUniform(n, seedProvider) {
   }
 }
 
-/* drawEngine: 개별 추첨 1회 */
+/* =========================================================
+   drawEngine: 개별 추첨 1회
+========================================================= */
 async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
   const wc = await getWebCryptoSample();
 
@@ -686,7 +727,9 @@ async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
   return { winnerRow, log };
 }
 
-/* STEP 3: 1차 / 2차 추첨 실행 */
+/* =========================================================
+   STEP 3: 1차 / 2차 추첨 실행
+========================================================= */
 function shortHex(hex) { return hex ? (hex.slice(0, 10) + '…') : '—'; }
 
 function appendLogRow(tableSel, log, extra) {
@@ -797,7 +840,9 @@ async function runRound2() {
   renderResults();
 }
 
-/* STEP 4: 결과 & 리포트 */
+/* =========================================================
+   STEP 4: 결과 & 리포트
+========================================================= */
 function renderResults() {
   $('#resultSection').hidden = false;
   $('#drawSection').classList.add('done');
@@ -811,7 +856,7 @@ function renderResults() {
     ['등수 구성', rankTiers.map(t => `${t.label} ${t.count}명`).join(' · ')],
     ['1차 추첨 완료', round1Logs.length ? round1Logs[round1Logs.length - 1].timestamp : '—'],
     ['2차 추첨 완료', round2Logs.length ? round2Logs[round2Logs.length - 1].timestamp : '—'],
-    ['난수원', 'Web Crypto API'],
+    ['난수원', 'Web Crypto API (crypto.getRandomValues)'],
     ['원본 SHA-256', fileHashHex.slice(0, 16) + '…']
   ].map(([label, value]) => `<div class="report-item"><div class="label">${escapeHtml(label)}</div><div class="value" style="font-size:13px">${escapeHtml(String(value))}</div></div>`).join('');
 
