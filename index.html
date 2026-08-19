@@ -882,10 +882,10 @@ function renderResults() {
     ['원본 파일', originalFile.name],
     ['참가자 수', participants.length.toLocaleString() + '명'],
     ['당첨자 수', total.toLocaleString() + '명'],
-    ['등수 구성', rankTiers.map(t => `${t.label} ${t.count}명`).join(' · ')],
+    ['등수 구성', rankTiers.map(t => `${t.label} ${t.count}명`).join(<br>)],
     ['1차 추첨 완료', round1Logs.length ? round1Logs[round1Logs.length - 1].timestamp : '—'],
     ['2차 추첨 완료', round2Logs.length ? round2Logs[round2Logs.length - 1].timestamp : '—'],
-    ['난수원', 'Web Crypto API (crypto.getRandomValues)'],
+    ['난수원', 'Web Crypto API'],
     ['원본 SHA-256', fileHashHex.slice(0, 16) + '…']
   ].map(([label, value]) => `<div class="report-item"><div class="label">${escapeHtml(label)}</div><div class="value" style="font-size:13px">${escapeHtml(String(value))}</div></div>`).join('');
 
