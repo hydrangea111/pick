@@ -914,12 +914,12 @@ $('#downloadResultBtn').addEventListener('click', () => {
   const base = originalFile.name.replace(/\.[^.]+$/, '');
   if (originalFile.ext === 'csv') {
     const csv = Papa.unparse(rows);
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `${base}_winners.csv`);
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `$[추첨완료]{base}.csv`);
   } else {
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'winners');
-    XLSX.writeFile(wb, `${base}_winners.xlsx`);
+    XLSX.writeFile(wb, `[추첨완료]${base}.xlsx`);
   }
 });
 
