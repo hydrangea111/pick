@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>무작위 추첨</title>
+<link rel="icon" href="data:image/webp;base64,UklGRlQCAABXRUJQVlA4IEgCAADQFACdASqAAIAAP3Gsz1+0rKmlpZLsEpAuCUAK9svcPvU6Jfdmq0jywAClBOxH80ulDObkacP0459zMPWL8HKEkOO9BbQY3fUO5YZBi7Qaoo7QvXm1ipwJ6R05Vz+Jn35AddNcIFh5YFMsbFEg4opbxDxl8tiPVU7l91JFtZeEZisVd/3rpf8d/6lyW9qqVZ9nRXqqSr6ZqekutvWoX7WU/wlEo7UfPMB4qCqgWIQwAP7u5ICH3JUMmb3qtZqStANJEfuEo++PGlISawLB9u6dPPTW+TBpz3A7+Iz8ibF9niTzhHGHR1d/cJKIR5c7AToy5nyxP5WizQ4taEMdEVxwHWHqXsZClPGAc7mnZ+L+7ie2MrXT8Ic+xrq0HkaZ3WW5aMxOumUYb3WLOBnWG1+IVwQf0mKYdYRyQ2tHgj2KTOP2yRn+gctR9cJCcjjcYlkCvuPlD4383dnt3N1CgKIhKJkSB+PFVTtKpISlH2ByvoMIok5sHvHqOZKkbRUnRPD1gQY2gKwnZpMRcX0CrR7WVEAPXE1As83Bl2IhIirLDxF0l7QAwUQwID2U2kfMAOxgvw3TlJpdnpn4pLjePqV6AErxLRKR3QJk2ylKfwXTXwdAle8MM86JWOP/cTA2DuJpvhBuhlTIx4n+Wl9ZdMM2KhO5TmAAhgaA4u6wJgUBPN5+6ruiUGiyCppeMqWxUI6DA6RPli3oK6QM6ElKtEmxFoObH0tALsR0IR3txeBZMxNo0QdSPiHUjTfw+HupdldAP24lgAAAAA==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --paper: #f2f0ea;
+    --paper-raised: #fbfaf6;
+    --line: #d8d4c8;
+    --line-strong: #b7b2a1;
+    --ink: #20232c;
+    --ink-soft: #565b6b;
+    --ink-faint: #8b8f9c;
+    --stamp-red: #a31f2a;
+    --stamp-red-soft: rgba(163, 31, 42, .08);
+    --gold: #8a6a2f;
+    --gold-soft: rgba(138, 106, 47, .1);
+    --error: #a31f2a;
+  }
+
+  body {
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 18% 8%, rgba(0,0,0,.025), transparent 40%),
+      radial-gradient(circle at 82% 92%, rgba(0,0,0,.02), transparent 45%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 48px 20px 100px;
+  }
+
+  .doc {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 14px;
+    margin-bottom: 38px;
+    position: relative;
+  }
+
+  .masthead .logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .masthead .title-block {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex: 1;
+    gap: 14px;
+  }
+
+  .masthead::after {
+    content: '';
+    position: absolute;
+    left: -2px; right: 6px; bottom: 0;
+    height: 6px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 8' preserveAspectRatio='none'%3E%3Cpath d='M0 5.2 C 40 6.5, 90 3.6, 140 5.1 S 240 6.8, 290 4.4 S 370 5.9, 400 4.8' stroke='%2320232c' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x;
+    background-size: 400px 6px;
+  }
+
+  .masthead h1 {
+    font-family: 'Newsreader', serif;
+    font-weight: 600;
+    font-size: 2.1em;
+    letter-spacing: -.01em;
+    transform: rotate(-.4deg);
+    display: inline-block;
+  }
+
+  .masthead .sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    line-height: 1.6;
+    transform: rotate(.3deg);
+  }
+
+  /* 스텝 카드 */
+  .step {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    margin-bottom: 28px;
+    box-shadow: 2px 3px 0 rgba(0,0,0,.025);
+    transform: rotate(-.15deg);
+  }
+  .step:nth-child(even) { transform: rotate(.18deg); box-shadow: -2px 3px 0 rgba(0,0,0,.025); }
+
+  .step[hidden] { display: none; }
+
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    letter-spacing: .1em;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px 4px 2px 5px;
+    padding: 3px 8px;
+    transform: rotate(-1deg);
+    display: inline-block;
+  }
+
+  .step-head h2 {
+    font-family: 'Newsreader', serif;
+    font-size: 1.25em;
+    font-weight: 600;
+  }
+
+  .step-body { padding: 22px 24px 26px; }
+
+  .step.done .step-num { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
+
+  /* 공용 요소 */
+  .hint { font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
+
+  .drop {
+    border: 1.5px dashed var(--line-strong);
+    border-radius: 3px;
+    padding: 34px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .drop.dragover { border-color: var(--stamp-red); background: var(--stamp-red-soft); }
+  .drop p { font-size: 13.5px; color: var(--ink-soft); }
+  .drop strong { color: var(--ink); }
+
+  .file-summary {
+    margin-top: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 14px 16px;
+  }
+  .file-summary .k { color: var(--ink-faint); display: inline-block; width: 110px; }
+
+  .warn-box {
+    margin-top: 12px;
+    border-left: 3px solid var(--stamp-red);
+    background: var(--stamp-red-soft);
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: var(--stamp-red);
+  }
+
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 20px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper-raised); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; background: var(--paper-raised); color: var(--ink); }
+
+  .btn-primary { background: var(--ink); color: var(--paper-raised); }
+  .btn-primary:hover { background: #000; }
+  .btn-primary:disabled { background: var(--line-strong); border-color: var(--line-strong); color: var(--paper-raised); opacity: .6; }
+
+  .btn-ghost { border-color: var(--line-strong); }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* 등수 설정 */
+  .tier-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  .tier-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .tier-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  .tier-table input[type="text"], .tier-table input[type="number"] {
+    width: 100%;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    padding: 6px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .tier-table input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .tier-del {
+    background: none; border: none; color: var(--ink-faint); cursor: pointer; font-size: 15px; padding: 4px 8px;
+  }
+  .tier-del:hover { color: var(--stamp-red); }
+
+  .tier-total {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    margin-top: 10px;
+    color: var(--ink-soft);
+  }
+  .tier-total.ok { color: #2f6b3a; }
+  .tier-total.bad { color: var(--stamp-red); }
+
+  /* 추첨 진행 */
+  .progress-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    min-height: 1.4em;
+  }
+
+  .progress-bar-bg { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .progress-bar { height: 100%; width: 0%; background: var(--stamp-red); transition: width .12s ease; }
+
+  .log-scroll {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--paper);
+  }
+
+  table.log-table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+  table.log-table th {
+    position: sticky; top: 0;
+    background: var(--paper-raised);
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-size: 9.5px;
+  }
+  table.log-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.log-table tr:last-child { animation: rowin .2s ease; }
+  @keyframes rowin { from { background: var(--gold-soft); } to { background: transparent; } }
+
+  .hex { color: var(--ink-faint); cursor: pointer; }
+  .hex:hover { color: var(--ink); text-decoration: underline; }
+
+  .seal {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--stamp-red);
+    border: 2px solid var(--stamp-red);
+    border-radius: 3px 9px 4px 8px / 8px 4px 9px 3px;
+    padding: 5px 13px 5px 9px;
+    transform: rotate(-2.5deg);
+    opacity: .88;
+    mix-blend-mode: multiply;
+  }
+  .seal::before { content: '●'; font-size: 8px; }
+
+  /*  결과 표 */
+  table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  table.result-table th {
+    text-align: left; padding: 8px 10px;
+    border-bottom: 2px solid var(--ink);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink-soft);
+  }
+  table.result-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  table.result-table td.rank { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--stamp-red); }
+
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .report-item {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 12px 14px;
+    background: var(--paper);
+    transform: rotate(-.3deg);
+  }
+  .report-item:nth-child(3n+1) { transform: rotate(.35deg); }
+  .report-item:nth-child(3n+2) { transform: rotate(-.4deg); }
+  .report-item:nth-child(3n) { transform: rotate(.2deg); }
+  .report-item .label { font-size: 10.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .report-item .value { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; }
+
+  .error-banner {
+    border-left: 3px solid var(--error);
+    background: var(--stamp-red-soft);
+    color: var(--error);
+    padding: 12px 16px;
+    font-size: 13px;
+    margin: 12px 0;
+    border-radius: 2px;
+  }
+
+  details.raw { margin-top: 4px; }
+  details.raw summary { cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); }
+  details.raw pre { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; white-space: pre-wrap; word-break: break-all; background: var(--paper); border: 1px solid var(--line); border-radius: 3px; padding: 10px; margin-top: 6px; max-height: 200px; overflow-y: auto; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .btn, .drop, #uploadSection, #tierSection, #drawSection { display: none !important; }
+  }
+
+.report-item .value {
+  white-space: pre-line;
+}
+
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="masthead">
+    <img class="logo" src="data:image/webp;base64,UklGRlQCAABXRUJQVlA4IEgCAADQFACdASqAAIAAP3Gsz1+0rKmlpZLsEpAuCUAK9svcPvU6Jfdmq0jywAClBOxH80ulDObkacP0459zMPWL8HKEkOO9BbQY3fUO5YZBi7Qaoo7QvXm1ipwJ6R05Vz+Jn35AddNcIFh5YFMsbFEg4opbxDxl8tiPVU7l91JFtZeEZisVd/3rpf8d/6lyW9qqVZ9nRXqqSr6ZqekutvWoX7WU/wlEo7UfPMB4qCqgWIQwAP7u5ICH3JUMmb3qtZqStANJEfuEo++PGlISawLB9u6dPPTW+TBpz3A7+Iz8ibF9niTzhHGHR1d/cJKIR5c7AToy5nyxP5WizQ4taEMdEVxwHWHqXsZClPGAc7mnZ+L+7ie2MrXT8Ic+xrq0HkaZ3WW5aMxOumUYb3WLOBnWG1+IVwQf0mKYdYRyQ2tHgj2KTOP2yRn+gctR9cJCcjjcYlkCvuPlD4383dnt3N1CgKIhKJkSB+PFVTtKpISlH2ByvoMIok5sHvHqOZKkbRUnRPD1gQY2gKwnZpMRcX0CrR7WVEAPXE1As83Bl2IhIirLDxF0l7QAwUQwID2U2kfMAOxgvw3TlJpdnpn4pLjePqV6AErxLRKR3QJk2ylKfwXTXwdAle8MM86JWOP/cTA2DuJpvhBuhlTIx4n+Wl9ZdMM2KhO5TmAAhgaA4u6wJgUBPN5+6ruiUGiyCppeMqWxUI6DA6RPli3oK6QM6ElKtEmxFoObH0tALsR0IR3txeBZMxNo0QdSPiHUjTfw+HupdldAP24lgAAAAA==" alt="logo">
+    <div class="title-block">
+      <h1>무작위 추첨</h1>
+      <div class="sub">Web Crypto API 이용 추첨</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: 업로드 -->
+  <section class="step" id="uploadSection">
+    <div class="step-head"><span class="step-num">STEP 01</span><h2>참가자 명단 업로드</h2></div>
+    <div class="step-body">
+      <p class="hint">.xlsx, .xls, .csv 파일을 지원합니다. 원본 열은 그대로 유지되며, 파일 내용을 임의로 변경하지 않습니다.</p>
+      <div class="drop" id="dropZone">
+        <p><strong>클릭하거나 파일을 드래그하세요</strong><br>참가자 명단 (Excel 또는 CSV)</p>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+      </div>
+      <div id="fileError"></div>
+      <div class="file-summary" id="fileSummary" hidden></div>
+    </div>
+  </section>
+
+  <!-- STEP 2: 등수 설정 -->
+  <section class="step" id="tierSection" hidden>
+    <div class="step-head"><span class="step-num">STEP 02</span><h2>등수별 인원 지정</h2></div>
+    <div class="step-body">
+      <p class="hint">등수 이름과 인원수를 입력하세요. 인원 합계가 1차 추첨에서 뽑힐 전체 당첨자 수가 됩니다.</p>
+      <table class="tier-table">
+        <thead><tr><th style="width:60%">등수 이름</th><th style="width:30%">인원 수</th><th></th></tr></thead>
+        <tbody id="tierBody"></tbody>
+      </table>
+      <button class="btn btn-ghost" id="addTierBtn" type="button">+ 등수 추가</button>
+      <div class="tier-total" id="tierTotal"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="startRound1Btn" disabled>1차 추첨 시작</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: 추첨 진행 -->
+  <section class="step" id="drawSection" hidden>
+    <div class="step-head"><span class="step-num">STEP 03</span><h2>추첨 진행</h2></div>
+    <div class="step-body">
+      <div id="round1Block">
+        <div class="progress-line" id="round1ProgressText">1차 추첨 대기 중</div>
+        <div class="progress-bar-bg"><div class="progress-bar" id="round1Bar"></div></div>
+        <div class="log-scroll"><table class="log-table" id="round1LogTable">
+          <thead><tr><th>#</th><th>시각</th><th>후보수</th><th>WebCrypto</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+
+      <div id="round2Block" style="margin-top:26px" hidden>
+        <div class="seal" style="margin-bottom:12px">1차 추첨 완료</div>
+        <div class="progress-line" id="round2ProgressText">2차 추첨 대기 중</div>
+        <div class="progress-bar-bg"><div class="progress-bar" id="round2Bar"></div></div>
+        <div class="log-scroll"><table class="log-table" id="round2LogTable">
+          <thead><tr><th>#</th><th>시각</th><th>등수</th><th>후보수</th><th>WebCrypto</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="startRound2Btn" hidden disabled>2차 추첨 시작</button>
+      </div>
+      <div id="drawError"></div>
+    </div>
+  </section>
+
+  <!-- STEP 4: 결과 & 리포트 -->
+  <section class="step" id="resultSection" hidden>
+    <div class="step-head"><span class="step-num">STEP 04</span><h2>최종 결과 & 리포트</h2></div>
+    <div class="step-body">
+      <div class="report-grid" id="reportGrid"></div>
+
+      <table class="result-table" id="resultTable"></table>
+
+      <div class="btn-row">
+        <button class="btn" id="downloadResultBtn">당첨자 결과 파일 다운로드</button>
+        <button class="btn btn-ghost" id="downloadLogBtn">추첨 로그(JSON) 다운로드</button>
+        <button class="btn btn-ghost" id="printBtn">리포트 인쇄 / PDF</button>
+      </div>
+
+      <details class="raw" style="margin-top:22px">
+        <summary>원본 API 응답 원문 보기 (전체 추첨 로그)</summary>
+        <pre id="rawLogPre"></pre>
+      </details>
+    </div>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+
+/* 상태 */
+let originalFile = null;
+let fileHashHex = null;
+let participants = [];      // 원본 열 + __rowId
+let idField = null;
+let rankTiers = [];         // [{label, count}]
+let winners = [];           // 1차 결과 (순서 없음)
+let finalResults = [];      // [{rank, ...row}]
+let round1Logs = [];
+let round2Logs = [];
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+function bufToHex(buf) {
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function hexToBytes(hex) {
+  const arr = [];
+  for (let i = 0; i < hex.length; i += 2) arr.push(parseInt(hex.substr(i, 2), 16));
+  return arr;
+}
+async function sha256HexOfFile(file) {
+  const buf = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return bufToHex(digest);
+}
+async function sha512Hex(str) {
+  const enc = new TextEncoder().encode(str);
+  const digest = await crypto.subtle.digest('SHA-512', enc);
+  return bufToHex(digest);
+}
+function nowISO() { return new Date().toLocaleString('ko-KR'); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* STEP 1: 파일 업로드 / 파싱 */
+const dropZone = $('#dropZone');
+const fileInput = $('#fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function showFileError(msg) {
+  $('#fileError').innerHTML = `<div class="error-banner">${escapeHtml(msg)}</div>`;
+}
+function clearFileError() { $('#fileError').innerHTML = ''; }
+
+async function handleFile(file) {
+  clearFileError();
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx', 'xls', 'csv'].includes(ext)) {
+    showFileError('지원하지 않는 파일 형식입니다. .xlsx, .xls, .csv 파일만 업로드할 수 있습니다.');
+    return;
+  }
+  if (file.size === 0) {
+    showFileError('빈 파일입니다. 참가자 데이터가 포함된 파일을 업로드해주세요.');
+    return;
+  }
+
+  try {
+    fileHashHex = await sha256HexOfFile(file);
+  } catch (e) {
+    showFileError('파일 해시 계산에 실패했습니다: ' + e.message);
+    return;
+  }
+
+  let rows;
+  try {
+    rows = (ext === 'csv') ? await parseCSV(file) : await parseExcel(file);
+  } catch (e) {
+    showFileError('파일을 읽는 중 오류가 발생했습니다: ' + e.message);
+    return;
+  }
+
+  if (!rows || rows.length === 0) {
+    showFileError('참가자 데이터가 없습니다. 파일 내용을 확인해주세요.');
+    return;
+  }
+
+  originalFile = { name: file.name, ext, size: file.size };
+  setParticipants(rows);
+}
+
+function parseCSV(file) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (res) => {
+        if (res.errors && res.errors.length) {
+          const fatal = res.errors.filter(e => e.type !== 'FieldMismatch');
+          if (fatal.length) { reject(new Error(fatal[0].message)); return; }
+        }
+        resolve(res.data);
+      },
+      error: (err) => reject(err)
+    });
+  });
+}
+
+function parseExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const sheetName = wb.SheetNames[0];
+        if (!sheetName) { reject(new Error('시트를 찾을 수 없습니다.')); return; }
+        const ws = wb.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        resolve(json);
+      } catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('파일 읽기 실패'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function setParticipants(rows) {
+  const keys = Object.keys(rows[0]);
+  idField = keys.find(k => k.trim().toUpperCase() === 'ID') || null;
+
+  participants = rows.map((row, i) => ({
+    ...row,
+    __rowId: idField ? String(row[idField]) : `AUTO-${i + 1}`
+  }));
+
+  const countMap = new Map();
+  participants.forEach(p => countMap.set(p.__rowId, (countMap.get(p.__rowId) || 0) + 1));
+  const dupKeys = [...countMap.entries()].filter(([, c]) => c > 1).map(([k]) => k);
+
+  renderFileSummary(dupKeys);
+  $('#uploadSection').classList.add('done');
+  initTierSection();
+  $('#tierSection').hidden = false;
+}
+
+function renderFileSummary(dupKeys) {
+  const box = $('#fileSummary');
+  box.hidden = false;
+  box.innerHTML = `
+    <div><span class="k">파일명</span>${escapeHtml(originalFile.name)}</div>
+    <div><span class="k">크기</span>${originalFile.size.toLocaleString()} bytes</div>
+    <div><span class="k">SHA-256</span>${fileHashHex}</div>
+    <div><span class="k">참가자 수</span>${participants.length.toLocaleString()}명</div>
+    <div><span class="k">식별자 열</span>${idField ? escapeHtml(idField) : '(없음 → 자동 부여)'}</div>
+  ` + (dupKeys.length
+      ? `<div class="warn-box">중복 식별자 ${dupKeys.length}건 발견: ${dupKeys.slice(0, 10).map(escapeHtml).join(', ')}${dupKeys.length > 10 ? ' 외' : ''}</div>`
+      : '');
+}
+
+/* STEP 2: 등수 설정 */
+function initTierSection() {
+  rankTiers = [{ label: '1등', count: 1 }];
+  renderTierRows();
+}
+
+function renderTierRows() {
+  const body = $('#tierBody');
+  body.innerHTML = '';
+  rankTiers.forEach((tier, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" data-idx="${idx}" data-field="label" value="${escapeHtml(tier.label)}"></td>
+      <td><input type="number" min="0" step="1" data-idx="${idx}" data-field="count" value="${tier.count}"></td>
+      <td><button class="tier-del" data-idx="${idx}" type="button" title="삭제">✕</button></td>
+    `;
+    body.appendChild(tr);
+  });
+  updateTierTotal();
+}
+
+$('#tierBody').addEventListener('input', (e) => {
+  const idx = Number(e.target.dataset.idx);
+  const field = e.target.dataset.field;
+  if (field === 'count') {
+    rankTiers[idx].count = Math.max(0, parseInt(e.target.value, 10) || 0);
+  } else {
+    rankTiers[idx].label = e.target.value;
+  }
+  updateTierTotal();
+});
+
+$('#tierBody').addEventListener('click', (e) => {
+  if (e.target.classList.contains('tier-del')) {
+    const idx = Number(e.target.dataset.idx);
+    rankTiers.splice(idx, 1);
+    renderTierRows();
+  }
+});
+
+$('#addTierBtn').addEventListener('click', () => {
+  rankTiers.push({ label: `${rankTiers.length + 1}등`, count: 1 });
+  renderTierRows();
+});
+
+function updateTierTotal() {
+  const total = rankTiers.reduce((s, t) => s + (Number(t.count) || 0), 0);
+  const el = $('#tierTotal');
+  const n = participants.length;
+  let ok = total > 0 && total <= n;
+  el.textContent = `당첨자 합계: ${total}명 / 참가자 ${n}명`;
+  el.className = 'tier-total ' + (ok ? 'ok' : 'bad');
+  if (!ok && total > n) el.textContent += ' — 참가자 수보다 많을 수 없습니다.';
+  if (total === 0) el.textContent += ' — 최소 1명 이상이어야 합니다.';
+  $('#startRound1Btn').disabled = !ok;
+}
+
+/* 난수원 */
+async function getWebCryptoSample() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return {
+    source: 'WebCrypto',
+    ok: true,
+    hex: bufToHex(bytes),
+    timestamp: nowISO(),
+    raw: { function: 'crypto.getRandomValues', byteLength: 32 }
+  };
+}
+
+async function deriveSeedHex(rawHex, context, counter) {
+  return sha512Hex(rawHex + '|' + context + '|' + counter);
+}
+
+// 인덱스 선택
+async function pickIndexUniform(n, seedProvider) {
+  if (n <= 0) throw new Error('후보자가 없습니다.');
+  const bitsNeeded = Math.max(1, Math.ceil(Math.log2(n)));
+  const bytesNeeded = Math.ceil(bitsNeeded / 8);
+  const mask = (1n << BigInt(bitsNeeded)) - 1n;
+  let counter = 0;
+  while (true) {
+    const hex = await seedProvider(counter++);
+    const bytes = hexToBytes(hex).slice(0, bytesNeeded);
+    let value = 0n;
+    for (const b of bytes) value = (value << 8n) | BigInt(b);
+    value &= mask;
+    if (value < BigInt(n)) return Number(value);
+    if (counter > 500) throw new Error('균등 샘플링이 예상보다 오래 걸립니다 (500회 초과).');
+  }
+}
+
+/* drawEngine: 개별 추첨 1회 */
+async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
+  const wc = await getWebCryptoSample();
+
+  if (!wc.ok) {
+    throw new Error(`${roundLabel} #${drawNumber}: Web Crypto 난수 생성에 실패하여 추첨을 진행할 수 없습니다.`);
+  }
+
+  const context = `${roundLabel}#${drawNumber}|n=${pool.length}`;
+  const candidateCountBefore = pool.length;
+
+  const index = await pickIndexUniform(pool.length, (counter) =>
+    deriveSeedHex(wc.hex, context, counter)
+  );
+
+  const winnerRow = pool.splice(index, 1)[0];
+
+  const log = {
+    round: roundLabel,
+    drawNumber,
+    totalDraws,
+    timestamp: nowISO(),
+    candidateCountBefore,
+    samples: [{
+      source: wc.source, ok: wc.ok, hex: wc.hex, timestamp: wc.timestamp
+    }],
+    selectedSource: wc.source,
+    finalIndex: index,
+    winnerRowId: winnerRow.__rowId,
+    winnerId: idField ? winnerRow[idField] : winnerRow.__rowId,
+    rawResponses: [{ source: wc.source, rawResponse: wc.raw }]
+  };
+
+  return { winnerRow, log };
+}
+
+/* STEP 3: 1차 / 2차 추첨 실행 */
+function shortHex(hex) { return hex ? (hex.slice(0, 10) + '…') : '—'; }
+
+function appendLogRow(tableSel, log, extra) {
+  const tbody = $(tableSel + ' tbody');
+  const tr = document.createElement('tr');
+  const wc = log.samples.find(s => s.source === 'WebCrypto');
+  const wcCell = wc.ok ? `<span class="hex" title="${wc.hex}">${shortHex(wc.hex)}</span>` : `<span style="color:var(--error)">실패</span>`;
+
+  let cells = `<td>${log.drawNumber}/${log.totalDraws}</td><td>${log.timestamp.slice(11, 19)}</td>`;
+  if (extra) cells += `<td>${escapeHtml(extra)}</td>`;
+  cells += `<td>${log.candidateCountBefore}</td><td>${wcCell}</td><td>${log.finalIndex}</td><td>${escapeHtml(String(log.winnerId))}</td>`;
+  tr.innerHTML = cells;
+  tbody.appendChild(tr);
+  tbody.parentElement.parentElement.scrollTop = tbody.parentElement.parentElement.scrollHeight;
+}
+
+$('#hexClickHandler');
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('hex')) {
+    alert(e.target.getAttribute('title'));
+  }
+});
+
+function showDrawError(msg) {
+  $('#drawError').innerHTML = `<div class="error-banner">${escapeHtml(msg)}
+    <div style="margin-top:8px"><button class="btn btn-ghost" id="retryDrawBtn" type="button">재시도</button></div>
+  </div>`;
+}
+
+$('#startRound1Btn').addEventListener('click', async () => {
+  $('#tierSection').classList.add('done');
+  $('#drawSection').hidden = false;
+  $('#startRound1Btn').disabled = true;
+  await runRound1();
+});
+
+async function runRound1() {
+  $('#drawError').innerHTML = '';
+  const pool = participants.map(p => ({ ...p }));
+  const total = rankTiers.reduce((s, t) => s + Number(t.count || 0), 0);
+  winners = [];
+  round1Logs = [];
+
+  const bar = $('#round1Bar');
+  const text = $('#round1ProgressText');
+
+  for (let i = 0; i < total; i++) {
+    text.textContent = `1차 추첨 진행 중 — ${i + 1} / ${total}`;
+    bar.style.width = Math.round(((i) / total) * 100) + '%';
+    try {
+      const { winnerRow, log } = await runSingleDraw(pool, '1회차', i + 1, total);
+      winners.push(winnerRow);
+      round1Logs.push(log);
+      appendLogRow('#round1LogTable', log);
+    } catch (e) {
+      text.textContent = '1차 추첨 중단됨';
+      showDrawError(e.message);
+      document.getElementById('retryDrawBtn')?.addEventListener('click', () => runRound1());
+      return;
+    }
+  }
+  bar.style.width = '100%';
+  text.textContent = `1차 추첨 완료 — 당첨자 ${total}명 확정`;
+
+  $('#round2Block').hidden = false;
+  const r2btn = $('#startRound2Btn');
+  r2btn.hidden = false;
+  r2btn.disabled = false;
+  r2btn.onclick = async () => {
+    r2btn.disabled = true;
+    await runRound2();
+  };
+}
+
+async function runRound2() {
+  $('#drawError').innerHTML = '';
+  const pool = winners.map(w => ({ ...w }));
+  const total = rankTiers.reduce((s, t) => s + Number(t.count || 0), 0);
+  finalResults = [];
+  round2Logs = [];
+
+  const bar = $('#round2Bar');
+  const text = $('#round2ProgressText');
+  let drawCounter = 0;
+
+  for (const tier of rankTiers) {
+    for (let i = 0; i < tier.count; i++) {
+      drawCounter++;
+      text.textContent = `2차 추첨 진행 중 — ${drawCounter} / ${total} (${tier.label})`;
+      bar.style.width = Math.round(((drawCounter - 1) / total) * 100) + '%';
+      try {
+        const { winnerRow, log } = await runSingleDraw(pool, '2회차', drawCounter, total);
+        log.assignedRank = tier.label;
+        finalResults.push({ rank: tier.label, ...winnerRow });
+        round2Logs.push(log);
+        appendLogRow('#round2LogTable', log, tier.label);
+      } catch (e) {
+        text.textContent = '2차 추첨 중단됨';
+        showDrawError(e.message);
+        document.getElementById('retryDrawBtn')?.addEventListener('click', () => runRound2());
+        return;
+      }
+    }
+  }
+  bar.style.width = '100%';
+  text.textContent = `2차 추첨 완료 — 전체 등수 확정`;
+
+  renderResults();
+}
+
+/* STEP 4: 결과 & 리포트 */
+function renderResults() {
+  $('#resultSection').hidden = false;
+  $('#drawSection').classList.add('done');
+
+  const total = rankTiers.reduce((s, t) => s + Number(t.count || 0), 0);
+  const grid = $('#reportGrid');
+  grid.innerHTML = [
+    ['원본 파일', originalFile.name],
+    ['참가자 수', participants.length.toLocaleString() + '명'],
+    ['당첨자 수', total.toLocaleString() + '명'],
+    ['등수 구성', rankTiers.map(t => `${t.label} ${t.count}명`).join('\n')],
+    ['1차 추첨 완료', round1Logs.length ? round1Logs[round1Logs.length - 1].timestamp : '—'],
+    ['2차 추첨 완료', round2Logs.length ? round2Logs[round2Logs.length - 1].timestamp : '—'],
+    ['난수원', 'Web Crypto API (crypto.getRandomValues)'],
+    ['원본 SHA-256', fileHashHex.slice(0, 16) + '…']
+  ].map(([label, value]) => `<div class="report-item"><div class="label">${escapeHtml(label)}</div><div class="value" style="font-size:13px">${escapeHtml(String(value))}</div></div>`).join('');
+
+  const cols = Object.keys(finalResults[0]).filter(k => k !== '__rowId' && k !== 'rank');
+  const table = $('#resultTable');
+  table.innerHTML = `<thead><tr><th>등수</th>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr></thead>
+    <tbody>${finalResults.map(r => `<tr><td class="rank">${escapeHtml(r.rank)}</td>${cols.map(c => `<td>${escapeHtml(r[c])}</td>`).join('')}</tr>`).join('')}</tbody>`;
+
+  $('#rawLogPre').textContent = JSON.stringify({ round1: round1Logs, round2: round2Logs }, null, 2);
+}
+
+$('#downloadResultBtn').addEventListener('click', () => {
+  const cols = Object.keys(finalResults[0]).filter(k => k !== '__rowId' && k !== 'rank');
+  const rows = finalResults.map(r => {
+    const o = { 등수: r.rank };
+    cols.forEach(c => o[c] = r[c]);
+    return o;
+  });
+
+  const base = originalFile.name.replace(/\.[^.]+$/, '');
+  if (originalFile.ext === 'csv') {
+    const csv = Papa.unparse(rows);
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `${base}_winners.csv`);
+  } else {
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'winners');
+    XLSX.writeFile(wb, `${base}_winners.xlsx`);
+  }
+});
+
+$('#downloadLogBtn').addEventListener('click', () => {
+  const payload = {
+    programVersion: 'draw-ledger-mvp-1.0',
+    generatedAt: nowISO(),
+    originalFile: { ...originalFile, sha256: fileHashHex },
+    participantCount: participants.length,
+    rankTiers,
+    round1Logs,
+    round2Logs,
+    finalResults: finalResults.map(r => ({ rank: r.rank, winnerRowId: r.__rowId }))
+  };
+  downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }), 'draw_log.json');
+});
+
+$('#printBtn').addEventListener('click', () => window.print());
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>무작위 추첨</title>
+<link rel="icon" href="data:image/webp;base64,UklGRlQCAABXRUJQVlA4IEgCAADQFACdASqAAIAAP3Gsz1+0rKmlpZLsEpAuCUAK9svcPvU6Jfdmq0jywAClBOxH80ulDObkacP0459zMPWL8HKEkOO9BbQY3fUO5YZBi7Qaoo7QvXm1ipwJ6R05Vz+Jn35AddNcIFh5YFMsbFEg4opbxDxl8tiPVU7l91JFtZeEZisVd/3rpf8d/6lyW9qqVZ9nRXqqSr6ZqekutvWoX7WU/wlEo7UfPMB4qCqgWIQwAP7u5ICH3JUMmb3qtZqStANJEfuEo++PGlISawLB9u6dPPTW+TBpz3A7+Iz8ibF9niTzhHGHR1d/cJKIR5c7AToy5nyxP5WizQ4taEMdEVxwHWHqXsZClPGAc7mnZ+L+7ie2MrXT8Ic+xrq0HkaZ3WW5aMxOumUYb3WLOBnWG1+IVwQf0mKYdYRyQ2tHgj2KTOP2yRn+gctR9cJCcjjcYlkCvuPlD4383dnt3N1CgKIhKJkSB+PFVTtKpISlH2ByvoMIok5sHvHqOZKkbRUnRPD1gQY2gKwnZpMRcX0CrR7WVEAPXE1As83Bl2IhIirLDxF0l7QAwUQwID2U2kfMAOxgvw3TlJpdnpn4pLjePqV6AErxLRKR3QJk2ylKfwXTXwdAle8MM86JWOP/cTA2DuJpvhBuhlTIx4n+Wl9ZdMM2KhO5TmAAhgaA4u6wJgUBPN5+6ruiUGiyCppeMqWxUI6DA6RPli3oK6QM6ElKtEmxFoObH0tALsR0IR3txeBZMxNo0QdSPiHUjTfw+HupdldAP24lgAAAAA==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --paper: #f2f0ea;
+    --paper-raised: #fbfaf6;
+    --line: #d8d4c8;
+    --line-strong: #b7b2a1;
+    --ink: #20232c;
+    --ink-soft: #565b6b;
+    --ink-faint: #8b8f9c;
+    --stamp-red: #a31f2a;
+    --stamp-red-soft: rgba(163, 31, 42, .08);
+    --gold: #8a6a2f;
+    --gold-soft: rgba(138, 106, 47, .1);
+    --error: #a31f2a;
+  }
+
+  body {
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 18% 8%, rgba(0,0,0,.025), transparent 40%),
+      radial-gradient(circle at 82% 92%, rgba(0,0,0,.02), transparent 45%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 48px 20px 100px;
+  }
+
+  .doc {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 14px;
+    margin-bottom: 38px;
+    position: relative;
+  }
+
+  .masthead .logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .masthead .title-block {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex: 1;
+    gap: 14px;
+  }
+
+  .masthead::after {
+    content: '';
+    position: absolute;
+    left: -2px; right: 6px; bottom: 0;
+    height: 6px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 8' preserveAspectRatio='none'%3E%3Cpath d='M0 5.2 C 40 6.5, 90 3.6, 140 5.1 S 240 6.8, 290 4.4 S 370 5.9, 400 4.8' stroke='%2320232c' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x;
+    background-size: 400px 6px;
+  }
+
+  .masthead h1 {
+    font-family: 'Newsreader', serif;
+    font-weight: 600;
+    font-size: 2.1em;
+    letter-spacing: -.01em;
+    transform: rotate(-.4deg);
+    display: inline-block;
+  }
+
+  .masthead .sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    line-height: 1.6;
+    transform: rotate(.3deg);
+  }
+
+  /* 스텝 카드 */
+  .step {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    margin-bottom: 28px;
+    box-shadow: 2px 3px 0 rgba(0,0,0,.025);
+    transform: rotate(-.15deg);
+  }
+  .step:nth-child(even) { transform: rotate(.18deg); box-shadow: -2px 3px 0 rgba(0,0,0,.025); }
+
+  .step[hidden] { display: none; }
+
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    letter-spacing: .1em;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px 4px 2px 5px;
+    padding: 3px 8px;
+    transform: rotate(-1deg);
+    display: inline-block;
+  }
+
+  .step-head h2 {
+    font-family: 'Newsreader', serif;
+    font-size: 1.25em;
+    font-weight: 600;
+  }
+
+  .step-body { padding: 22px 24px 26px; }
+
+  .step.done .step-num { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
+
+  /* 공용 요소 */
+  .hint { font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
+
+  .drop {
+    border: 1.5px dashed var(--line-strong);
+    border-radius: 3px;
+    padding: 34px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .drop.dragover { border-color: var(--stamp-red); background: var(--stamp-red-soft); }
+  .drop p { font-size: 13.5px; color: var(--ink-soft); }
+  .drop strong { color: var(--ink); }
+
+  .file-summary {
+    margin-top: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 14px 16px;
+  }
+  .file-summary .k { color: var(--ink-faint); display: inline-block; width: 110px; }
+
+  .warn-box {
+    margin-top: 12px;
+    border-left: 3px solid var(--stamp-red);
+    background: var(--stamp-red-soft);
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: var(--stamp-red);
+  }
+
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 20px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper-raised); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; background: var(--paper-raised); color: var(--ink); }
+
+  .btn-primary { background: var(--ink); color: var(--paper-raised); }
+  .btn-primary:hover { background: #000; }
+  .btn-primary:disabled { background: var(--line-strong); border-color: var(--line-strong); color: var(--paper-raised); opacity: .6; }
+
+  .btn-ghost { border-color: var(--line-strong); }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* 등수 설정 */
+  .tier-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  .tier-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .tier-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  .tier-table input[type="text"], .tier-table input[type="number"] {
+    width: 100%;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    padding: 6px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .tier-table input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .tier-del {
+    background: none; border: none; color: var(--ink-faint); cursor: pointer; font-size: 15px; padding: 4px 8px;
+  }
+  .tier-del:hover { color: var(--stamp-red); }
+
+  .tier-total {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    margin-top: 10px;
+    color: var(--ink-soft);
+  }
+  .tier-total.ok { color: #2f6b3a; }
+  .tier-total.bad { color: var(--stamp-red); }
+
+  /* 추첨 진행 */
+  .progress-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    min-height: 1.4em;
+  }
+
+  .progress-bar-bg { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .progress-bar { height: 100%; width: 0%; background: var(--stamp-red); transition: width .12s ease; }
+
+  .log-scroll {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--paper);
+  }
+
+  table.log-table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+  table.log-table th {
+    position: sticky; top: 0;
+    background: var(--paper-raised);
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-size: 9.5px;
+  }
+  table.log-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.log-table tr:last-child { animation: rowin .2s ease; }
+  @keyframes rowin { from { background: var(--gold-soft); } to { background: transparent; } }
+
+  .hex { color: var(--ink-faint); cursor: pointer; }
+  .hex:hover { color: var(--ink); text-decoration: underline; }
+
+  .seal {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--stamp-red);
+    border: 2px solid var(--stamp-red);
+    border-radius: 3px 9px 4px 8px / 8px 4px 9px 3px;
+    padding: 5px 13px 5px 9px;
+    transform: rotate(-2.5deg);
+    opacity: .88;
+    mix-blend-mode: multiply;
+  }
+  .seal::before { content: '●'; font-size: 8px; }
+
+  /*  결과 표 */
+  table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  table.result-table th {
+    text-align: left; padding: 8px 10px;
+    border-bottom: 2px solid var(--ink);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink-soft);
+  }
+  table.result-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  table.result-table td.rank { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--stamp-red); }
+
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .report-item {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 12px 14px;
+    background: var(--paper);
+    transform: rotate(-.3deg);
+  }
+  .report-item:nth-child(3n+1) { transform: rotate(.35deg); }
+  .report-item:nth-child(3n+2) { transform: rotate(-.4deg); }
+  .report-item:nth-child(3n) { transform: rotate(.2deg); }
+  .report-item .label { font-size: 10.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .report-item .value { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; }
+
+  .error-banner {
+    border-left: 3px solid var(--error);
+    background: var(--stamp-red-soft);
+    color: var(--error);
+    padding: 12px 16px;
+    font-size: 13px;
+    margin: 12px 0;
+    border-radius: 2px;
+  }
+
+  details.raw { margin-top: 4px; }
+  details.raw summary { cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); }
+  details.raw pre { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; white-space: pre-wrap; word-break: break-all; background: var(--paper); border: 1px solid var(--line); border-radius: 3px; padding: 10px; margin-top: 6px; max-height: 200px; overflow-y: auto; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .btn, .drop, #uploadSection, #tierSection, #drawSection { display: none !important; }
+  }
+
+/* final fixes */
+.seal {
+  transform: none !important;
+}
+.report-item .value {
+  white-space: pre-line;
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="masthead">
+    <img class="logo" src="data:image/webp;base64,UklGRlQCAABXRUJQVlA4IEgCAADQFACdASqAAIAAP3Gsz1+0rKmlpZLsEpAuCUAK9svcPvU6Jfdmq0jywAClBOxH80ulDObkacP0459zMPWL8HKEkOO9BbQY3fUO5YZBi7Qaoo7QvXm1ipwJ6R05Vz+Jn35AddNcIFh5YFMsbFEg4opbxDxl8tiPVU7l91JFtZeEZisVd/3rpf8d/6lyW9qqVZ9nRXqqSr6ZqekutvWoX7WU/wlEo7UfPMB4qCqgWIQwAP7u5ICH3JUMmb3qtZqStANJEfuEo++PGlISawLB9u6dPPTW+TBpz3A7+Iz8ibF9niTzhHGHR1d/cJKIR5c7AToy5nyxP5WizQ4taEMdEVxwHWHqXsZClPGAc7mnZ+L+7ie2MrXT8Ic+xrq0HkaZ3WW5aMxOumUYb3WLOBnWG1+IVwQf0mKYdYRyQ2tHgj2KTOP2yRn+gctR9cJCcjjcYlkCvuPlD4383dnt3N1CgKIhKJkSB+PFVTtKpISlH2ByvoMIok5sHvHqOZKkbRUnRPD1gQY2gKwnZpMRcX0CrR7WVEAPXE1As83Bl2IhIirLDxF0l7QAwUQwID2U2kfMAOxgvw3TlJpdnpn4pLjePqV6AErxLRKR3QJk2ylKfwXTXwdAle8MM86JWOP/cTA2DuJpvhBuhlTIx4n+Wl9ZdMM2KhO5TmAAhgaA4u6wJgUBPN5+6ruiUGiyCppeMqWxUI6DA6RPli3oK6QM6ElKtEmxFoObH0tALsR0IR3txeBZMxNo0QdSPiHUjTfw+HupdldAP24lgAAAAA==" alt="logo">
+    <div class="title-block">
+      <h1>무작위 추첨</h1>
+      <div class="sub">Web Crypto API 이용 추첨</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: 업로드 -->
+  <section class="step" id="uploadSection">
+    <div class="step-head"><span class="step-num">STEP 01</span><h2>참가자 명단 업로드</h2></div>
+    <div class="step-body">
+      <p class="hint">.xlsx, .xls, .csv 파일을 지원합니다. 원본 열은 그대로 유지되며, 파일 내용을 임의로 변경하지 않습니다.</p>
+      <div class="drop" id="dropZone">
+        <p><strong>클릭하거나 파일을 드래그하세요</strong><br>참가자 명단 (Excel 또는 CSV)</p>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+      </div>
+      <div id="fileError"></div>
+      <div class="file-summary" id="fileSummary" hidden></div>
+    </div>
+  </section>
+
+  <!-- STEP 2: 등수 설정 -->
+  <section class="step" id="tierSection" hidden>
+    <div class="step-head"><span class="step-num">STEP 02</span><h2>등수별 인원 지정</h2></div>
+    <div class="step-body">
+      <p class="hint">등수 이름과 인원수를 입력하세요. 인원 합계가 1차 추첨에서 뽑힐 전체 당첨자 수가 됩니다.</p>
+      <table class="tier-table">
+        <thead><tr><th style="width:60%">등수 이름</th><th style="width:30%">인원 수</th><th></th></tr></thead>
+        <tbody id="tierBody"></tbody>
+      </table>
+      <button class="btn btn-ghost" id="addTierBtn" type="button">+ 등수 추가</button>
+      <div class="tier-total" id="tierTotal"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="startRound1Btn" disabled>1차 추첨 시작</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: 추첨 진행 -->
+  <section class="step" id="drawSection" hidden>
+    <div class="step-head"><span class="step-num">STEP 03</span><h2>추첨 진행</h2></div>
+    <div class="step-body">
+      <div id="round1Block">
+        <div class="progress-line" id="round1ProgressText">1차 추첨 대기 중</div>
+        <div class="progress-bar-bg"><div class="progress-bar" id="round1Bar"></div></div>
+        <div class="log-scroll"><table class="log-table" id="round1LogTable">
+          <thead><tr><th>#</th><th>시각</th><th>후보수</th><th>WebCrypto</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+
+      <div id="round2Block" style="margin-top:26px" hidden>
+        <div class="seal" style="margin-bottom:12px">1차 추첨 완료</div>
+        <div class="progress-line" id="round2ProgressText">2차 추첨 대기 중</div>
+        <div class="progress-bar-bg"><div class="progress-bar" id="round2Bar"></div></div>
+        <div class="log-scroll"><table class="log-table" id="round2LogTable">
+          <thead><tr><th>#</th><th>시각</th><th>등수</th><th>후보수</th><th>WebCrypto</th><th>최종인덱스</th><th>당첨ID</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="startRound2Btn" hidden disabled>2차 추첨 시작</button>
+      </div>
+      <div id="drawError"></div>
+    </div>
+  </section>
+
+  <!-- STEP 4: 결과 & 리포트 -->
+  <section class="step" id="resultSection" hidden>
+    <div class="step-head"><span class="step-num">STEP 04</span><h2>최종 결과 & 리포트</h2></div>
+    <div class="step-body">
+      <div class="report-grid" id="reportGrid"></div>
+
+      <table class="result-table" id="resultTable"></table>
+
+      <div class="btn-row">
+        <button class="btn" id="downloadResultBtn">당첨자 결과 파일 다운로드</button>
+        <button class="btn btn-ghost" id="downloadLogBtn">추첨 로그(JSON) 다운로드</button>
+        <button class="btn btn-ghost" id="printBtn">리포트 인쇄 / PDF</button>
+      </div>
+
+      <details class="raw" style="margin-top:22px">
+        <summary>원본 API 응답 원문 보기 (전체 추첨 로그)</summary>
+        <pre id="rawLogPre"></pre>
+      </details>
+    </div>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+
+/* 상태 */
+let originalFile = null;
+let fileHashHex = null;
+let participants = [];      // 원본 열 + __rowId
+let idField = null;
+let rankTiers = [];         // [{label, count}]
+let winners = [];           // 1차 결과 (순서 없음)
+let finalResults = [];      // [{rank, ...row}]
+let round1Logs = [];
+let round2Logs = [];
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+function bufToHex(buf) {
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function hexToBytes(hex) {
+  const arr = [];
+  for (let i = 0; i < hex.length; i += 2) arr.push(parseInt(hex.substr(i, 2), 16));
+  return arr;
+}
+async function sha256HexOfFile(file) {
+  const buf = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return bufToHex(digest);
+}
+async function sha512Hex(str) {
+  const enc = new TextEncoder().encode(str);
+  const digest = await crypto.subtle.digest('SHA-512', enc);
+  return bufToHex(digest);
+}
+function nowISO() { return new Date().toLocaleString('ko-KR'); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* STEP 1: 파일 업로드 / 파싱 */
+const dropZone = $('#dropZone');
+const fileInput = $('#fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function showFileError(msg) {
+  $('#fileError').innerHTML = `<div class="error-banner">${escapeHtml(msg)}</div>`;
+}
+function clearFileError() { $('#fileError').innerHTML = ''; }
+
+async function handleFile(file) {
+  clearFileError();
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx', 'xls', 'csv'].includes(ext)) {
+    showFileError('지원하지 않는 파일 형식입니다. .xlsx, .xls, .csv 파일만 업로드할 수 있습니다.');
+    return;
+  }
+  if (file.size === 0) {
+    showFileError('빈 파일입니다. 참가자 데이터가 포함된 파일을 업로드해주세요.');
+    return;
+  }
+
+  try {
+    fileHashHex = await sha256HexOfFile(file);
+  } catch (e) {
+    showFileError('파일 해시 계산에 실패했습니다: ' + e.message);
+    return;
+  }
+
+  let rows;
+  try {
+    rows = (ext === 'csv') ? await parseCSV(file) : await parseExcel(file);
+  } catch (e) {
+    showFileError('파일을 읽는 중 오류가 발생했습니다: ' + e.message);
+    return;
+  }
+
+  if (!rows || rows.length === 0) {
+    showFileError('참가자 데이터가 없습니다. 파일 내용을 확인해주세요.');
+    return;
+  }
+
+  originalFile = { name: file.name, ext, size: file.size };
+  setParticipants(rows);
+}
+
+function parseCSV(file) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (res) => {
+        if (res.errors && res.errors.length) {
+          const fatal = res.errors.filter(e => e.type !== 'FieldMismatch');
+          if (fatal.length) { reject(new Error(fatal[0].message)); return; }
+        }
+        resolve(res.data);
+      },
+      error: (err) => reject(err)
+    });
+  });
+}
+
+function parseExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const sheetName = wb.SheetNames[0];
+        if (!sheetName) { reject(new Error('시트를 찾을 수 없습니다.')); return; }
+        const ws = wb.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        resolve(json);
+      } catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('파일 읽기 실패'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function setParticipants(rows) {
+  const keys = Object.keys(rows[0]);
+  idField = keys.find(k => k.trim().toUpperCase() === 'ID') || null;
+
+  participants = rows.map((row, i) => ({
+    ...row,
+    __rowId: idField ? String(row[idField]) : `AUTO-${i + 1}`
+  }));
+
+  const countMap = new Map();
+  participants.forEach(p => countMap.set(p.__rowId, (countMap.get(p.__rowId) || 0) + 1));
+  const dupKeys = [...countMap.entries()].filter(([, c]) => c > 1).map(([k]) => k);
+
+  renderFileSummary(dupKeys);
+  $('#uploadSection').classList.add('done');
+  initTierSection();
+  $('#tierSection').hidden = false;
+}
+
+function renderFileSummary(dupKeys) {
+  const box = $('#fileSummary');
+  box.hidden = false;
+  box.innerHTML = `
+    <div><span class="k">파일명</span>${escapeHtml(originalFile.name)}</div>
+    <div><span class="k">크기</span>${originalFile.size.toLocaleString()} bytes</div>
+    <div><span class="k">SHA-256</span>${fileHashHex}</div>
+    <div><span class="k">참가자 수</span>${participants.length.toLocaleString()}명</div>
+    <div><span class="k">식별자 열</span>${idField ? escapeHtml(idField) : '(없음 → 자동 부여)'}</div>
+  ` + (dupKeys.length
+      ? `<div class="warn-box">중복 식별자 ${dupKeys.length}건 발견: ${dupKeys.slice(0, 10).map(escapeHtml).join(', ')}${dupKeys.length > 10 ? ' 외' : ''}</div>`
+      : '');
+}
+
+/* STEP 2: 등수 설정 */
+function initTierSection() {
+  rankTiers = [{ label: '1등', count: 1 }];
+  renderTierRows();
+}
+
+function renderTierRows() {
+  const body = $('#tierBody');
+  body.innerHTML = '';
+  rankTiers.forEach((tier, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" data-idx="${idx}" data-field="label" value="${escapeHtml(tier.label)}"></td>
+      <td><input type="number" min="0" step="1" data-idx="${idx}" data-field="count" value="${tier.count}"></td>
+      <td><button class="tier-del" data-idx="${idx}" type="button" title="삭제">✕</button></td>
+    `;
+    body.appendChild(tr);
+  });
+  updateTierTotal();
+}
+
+$('#tierBody').addEventListener('input', (e) => {
+  const idx = Number(e.target.dataset.idx);
+  const field = e.target.dataset.field;
+  if (field === 'count') {
+    rankTiers[idx].count = Math.max(0, parseInt(e.target.value, 10) || 0);
+  } else {
+    rankTiers[idx].label = e.target.value;
+  }
+  updateTierTotal();
+});
+
+$('#tierBody').addEventListener('click', (e) => {
+  if (e.target.classList.contains('tier-del')) {
+    const idx = Number(e.target.dataset.idx);
+    rankTiers.splice(idx, 1);
+    renderTierRows();
+  }
+});
+
+$('#addTierBtn').addEventListener('click', () => {
+  rankTiers.push({ label: `${rankTiers.length + 1}등`, count: 1 });
+  renderTierRows();
+});
+
+function updateTierTotal() {
+  const total = rankTiers.reduce((s, t) => s + (Number(t.count) || 0), 0);
+  const el = $('#tierTotal');
+  const n = participants.length;
+  let ok = total > 0 && total <= n;
+  el.textContent = `당첨자 합계: ${total}명 / 참가자 ${n}명`;
+  el.className = 'tier-total ' + (ok ? 'ok' : 'bad');
+  if (!ok && total > n) el.textContent += ' — 참가자 수보다 많을 수 없습니다.';
+  if (total === 0) el.textContent += ' — 최소 1명 이상이어야 합니다.';
+  $('#startRound1Btn').disabled = !ok;
+}
+
+/* 난수원 */
+async function getWebCryptoSample() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return {
+    source: 'WebCrypto',
+    ok: true,
+    hex: bufToHex(bytes),
+    timestamp: nowISO(),
+    raw: { function: 'crypto.getRandomValues', byteLength: 32 }
+  };
+}
+
+async function deriveSeedHex(rawHex, context, counter) {
+  return sha512Hex(rawHex + '|' + context + '|' + counter);
+}
+
+// 인덱스 선택
+async function pickIndexUniform(n, seedProvider) {
+  if (n <= 0) throw new Error('후보자가 없습니다.');
+  const bitsNeeded = Math.max(1, Math.ceil(Math.log2(n)));
+  const bytesNeeded = Math.ceil(bitsNeeded / 8);
+  const mask = (1n << BigInt(bitsNeeded)) - 1n;
+  let counter = 0;
+  while (true) {
+    const hex = await seedProvider(counter++);
+    const bytes = hexToBytes(hex).slice(0, bytesNeeded);
+    let value = 0n;
+    for (const b of bytes) value = (value << 8n) | BigInt(b);
+    value &= mask;
+    if (value < BigInt(n)) return Number(value);
+    if (counter > 500) throw new Error('균등 샘플링이 예상보다 오래 걸립니다 (500회 초과).');
+  }
+}
+
+/* drawEngine: 개별 추첨 1회 */
+async function runSingleDraw(pool, roundLabel, drawNumber, totalDraws) {
+  const wc = await getWebCryptoSample();
+
+  if (!wc.ok) {
+    throw new Error(`${roundLabel} #${drawNumber}: Web Crypto 난수 생성에 실패하여 추첨을 진행할 수 없습니다.`);
+  }
+
+  const context = `${roundLabel}#${drawNumber}|n=${pool.length}`;
+  const candidateCountBefore = pool.length;
+
+  const index = await pickIndexUniform(pool.length, (counter) =>
+    deriveSeedHex(wc.hex, context, counter)
+  );
+
+  const winnerRow = pool.splice(index, 1)[0];
+
+  const log = {
+    round: roundLabel,
+    drawNumber,
+    totalDraws,
+    timestamp: nowISO(),
+    candidateCountBefore,
+    samples: [{
+      source: wc.source, ok: wc.ok, hex: wc.hex, timestamp: wc.timestamp
+    }],
+    selectedSource: wc.source,
+    finalIndex: index,
+    winnerRowId: winnerRow.__rowId,
+    winnerId: idField ? winnerRow[idField] : winnerRow.__rowId,
+    rawResponses: [{ source: wc.source, rawResponse: wc.raw }]
+  };
+
+  return { winnerRow, log };
+}
+
+/* STEP 3: 1차 / 2차 추첨 실행 */
+function shortHex(hex) { return hex ? (hex.slice(0, 10) + '…') : '—'; }
+
+function appendLogRow(tableSel, log, extra) {
+  const tbody = $(tableSel + ' tbody');
+  const tr = document.createElement('tr');
+  const wc = log.samples.find(s => s.source === 'WebCrypto');
+  const wcCell = wc.ok ? `<span class="hex" title="${wc.hex}">${shortHex(wc.hex)}</span>` : `<span style="color:var(--error)">실패</span>`;
+
+  let cells = `<td>${log.drawNumber}/${log.totalDraws}</td><td>${log.timestamp.slice(11, 19)}</td>`;
+  if (extra) cells += `<td>${escapeHtml(extra)}</td>`;
+  cells += `<td>${log.candidateCountBefore}</td><td>${wcCell}</td><td>${log.finalIndex}</td><td>${escapeHtml(String(log.winnerId))}</td>`;
+  tr.innerHTML = cells;
+  tbody.appendChild(tr);
+  tbody.parentElement.parentElement.scrollTop = tbody.parentElement.parentElement.scrollHeight;
+}
+
+$('#hexClickHandler');
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('hex')) {
+    alert(e.target.getAttribute('title'));
+  }
+});
+
+function showDrawError(msg) {
+  $('#drawError').innerHTML = `<div class="error-banner">${escapeHtml(msg)}
+    <div style="margin-top:8px"><button class="btn btn-ghost" id="retryDrawBtn" type="button">재시도</button></div>
+  </div>`;
+}
+
+$('#startRound1Btn').addEventListener('click', async () => {
+  $('#tierSection').classList.add('done');
+  $('#drawSection').hidden = false;
+  $('#startRound1Btn').disabled = true;
+  await runRound1();
+});
+
+async function runRound1() {
+  $('#drawError').innerHTML = '';
+  const pool = participants.map(p => ({ ...p }));
+  const total = rankTiers.reduce((s, t) => s + Number(t.count || 0), 0);
+  winners = [];
+  round1Logs = [];
+
+  const bar = $('#round1Bar');
+  const text = $('#round1ProgressText');
+
+  for (let i = 0; i < total; i++) {
+    text.textContent = `1차 추첨 진행 중 — ${i + 1} / ${total}`;
+    bar.style.width = Math.round(((i) / total) * 100) + '%';
+    try {
+      const { winnerRow, log } = await runSingleDraw(pool, '1회차', i + 1, total);
+      winners.push(winnerRow);
+      round1Logs.push(log);
+      appendLogRow('#round1LogTable', log);
+    } catch (e) {
+      text.textContent = '1차 추첨 중단됨';
+      showDrawError(e.message);
+      document.getElementById('retryDrawBtn')?.addEventListener('click', () => runRound1());
+      return;
+    }
+  }
+  bar.style.width = '100%';
+  text.textContent = `1차 추첨 완료 — 당첨자 ${total}명 확정`;
+
+  $('#round2Block').hidden = false;
+  const r2btn = $('#startRound2Btn');
+  r2btn.hidden = false;
+  r2btn.disabled = false;
+  r2btn.onclick = async () => {
+    r2btn.disabled = true;
+    await runRound2();
+  };
+}
+
+async function runRound2() {
+  $('#drawError').innerHTML = '';
+  const pool = winners.map(w => ({ ...w }));
+  const total = rankTiers.reduce((s, t) => s + Number(t.count || 0), 0);
+  finalResults = [];
+  round2Logs = [];
+
+  const bar = $('#round2Bar');
+  const text = $('#round2ProgressText');
+  let drawCounter = 0;
+
+  for (const tier of rankTiers) {
+    for (let i = 0; i < tier.count; i++) {
+      drawCounter++;
+      text.textContent = `2차 추첨 진행 중 — ${drawCounter} / ${total} (${tier.label})`;
+      bar.style.width = Math.round(((drawCounter - 1) / total) * 100) + '%';
+      try {
+        const { winnerRow, log } = await runSingleDraw(pool, '2회차', drawCounter, total);
+        log.assignedRank = tier.label;
+        finalResults.push({ rank: tier.label, ...winnerRow });
+        round2Logs.push(log);
+        appendLogRow('#round2LogTable', log, tier.label);
+      } catch (e) {
+        text.textContent = '2차 추첨 중단됨';
+        showDrawError(e.message);
+        document.getElementById('retryDrawBtn')?.addEventListener('click', () => runRound2());
+        return;
+      }
+    }
+  }
+  bar.style.width = '100%';
+  text.textContent = `2차 추첨 완료 — 전체 등수 확정`;
+
+  renderResults();
+}
+
+/* STEP 4: 결과 & 리포트 */
+function renderResults() {
+  $('#resultSection').hidden = false;
+  $('#drawSection').classList.add('done');
+
+  const total = rankTiers.reduce((s, t) => s + Number(t.count || 0), 0);
+  const grid = $('#reportGrid');
+  grid.innerHTML = [
+    ['원본 파일', originalFile.name],
+    ['참가자 수', participants.length.toLocaleString() + '명'],
+    ['당첨자 수', total.toLocaleString() + '명'],
+    ['등수 구성', rankTiers.map(t => `${t.label} ${t.count}명`).join('\n')],
+    ['1차 추첨 완료', round1Logs.length ? round1Logs[round1Logs.length - 1].timestamp : '—'],
+    ['2차 추첨 완료', round2Logs.length ? round2Logs[round2Logs.length - 1].timestamp : '—'],
+    ['난수원', 'Web Crypto API (crypto.getRandomValues)'],
+    ['원본 SHA-256', fileHashHex.slice(0, 16) + '…']
+  ].map(([label, value]) => `<div class="report-item"><div class="label">${escapeHtml(label)}</div><div class="value" style="font-size:13px">${escapeHtml(String(value))}</div></div>`).join('');
+
+  const cols = Object.keys(finalResults[0]).filter(k => k !== '__rowId' && k !== 'rank');
+  const table = $('#resultTable');
+  table.innerHTML = `<thead><tr><th>등수</th>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr></thead>
+    <tbody>${finalResults.map(r => `<tr><td class="rank">${escapeHtml(r.rank)}</td>${cols.map(c => `<td>${escapeHtml(r[c])}</td>`).join('')}</tr>`).join('')}</tbody>`;
+
+  $('#rawLogPre').textContent = JSON.stringify({ round1: round1Logs, round2: round2Logs }, null, 2);
+}
+
+$('#downloadResultBtn').addEventListener('click', () => {
+  const cols = Object.keys(finalResults[0]).filter(k => k !== '__rowId' && k !== 'rank');
+  const rows = finalResults.map(r => {
+    const o = { 등수: r.rank };
+    cols.forEach(c => o[c] = r[c]);
+    return o;
+  });
+
+  const base = originalFile.name.replace(/\.[^.]+$/, '');
+  if (originalFile.ext === 'csv') {
+    const csv = Papa.unparse(rows);
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `${base}_winners.csv`);
+  } else {
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'winners');
+    XLSX.writeFile(wb, `${base}_winners.xlsx`);
+  }
+});
+
+$('#downloadLogBtn').addEventListener('click', () => {
+  const payload = {
+    programVersion: 'draw-ledger-mvp-1.0',
+    generatedAt: nowISO(),
+    originalFile: { ...originalFile, sha256: fileHashHex },
+    participantCount: participants.length,
+    rankTiers,
+    round1Logs,
+    round2Logs,
+    finalResults: finalResults.map(r => ({ rank: r.rank, winnerRowId: r.__rowId }))
+  };
+  downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }), 'draw_log.json');
+});
+
+$('#printBtn').addEventListener('click', () => window.print());
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
