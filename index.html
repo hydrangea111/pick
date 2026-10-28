@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>무작위 추첨</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23f2f0ea'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='25'%20fill='%23a31f2a'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='20.5'%20fill='none'%20stroke='%23f2f0ea'%20stroke-width='1.5'/%3E%3Cg%20fill='%23f2f0ea'%3E%3Ccircle%20cx='22'%20cy='22'%20r='4'/%3E%3Ccircle%20cx='42'%20cy='22'%20r='4'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='4'/%3E%3Ccircle%20cx='22'%20cy='42'%20r='4'/%3E%3Ccircle%20cx='42'%20cy='42'%20r='4'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23eff6ff'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='25'%20fill='%232563eb'/%3E%3Cpath%20d='M20%2033l8%208%2017-18'%20fill='none'%20stroke='%23fff'%20stroke-width='6'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -13,23 +13,24 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --paper: #f2f0ea;
-    --paper-raised: #fbfaf6;
-    --line: #d8d4c8;
-    --line-strong: #b7b2a1;
-    --ink: #20232c;
-    --ink-soft: #565b6b;
-    --ink-faint: #8b8f9c;
-    --stamp-red: #a31f2a;
-    --stamp-red-soft: rgba(163, 31, 42, .08);
-    --gold: #8a6a2f;
-    --gold-soft: rgba(138, 106, 47, .1);
-    --error: #a31f2a;
+    --paper: #f1f5f9;
+    --paper-raised: #ffffff;
+    --line: #e2e8f0;
+    --line-strong: #cbd5e1;
+    --ink: #1e293b;
+    --ink-soft: #475569;
+    --ink-faint: #64748b;
+    --stamp-red: #2563eb;
+    --stamp-red-soft: rgba(37, 99, 235, .08);
+    --gold: #1d4ed8;
+    --gold-soft: rgba(29, 78, 216, .1);
+    --error: #be123c;
   }
 
   body {
     background: var(--paper);
     background-image:
+      linear-gradient(135deg, #f8fafc, #eff6ff) fixed,
       radial-gradient(circle at 18% 8%, rgba(0,0,0,.025), transparent 40%),
       radial-gradient(circle at 82% 92%, rgba(0,0,0,.02), transparent 45%),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -53,14 +54,6 @@
     position: relative;
   }
 
-  .masthead .logo {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-    border-radius: 6px;
-    flex-shrink: 0;
-  }
-
   .masthead .title-block {
     display: flex;
     align-items: baseline;
@@ -74,7 +67,7 @@
     position: absolute;
     left: -2px; right: 6px; bottom: 0;
     height: 6px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 8' preserveAspectRatio='none'%3E%3Cpath d='M0 5.2 C 40 6.5, 90 3.6, 140 5.1 S 240 6.8, 290 4.4 S 370 5.9, 400 4.8' stroke='%2320232c' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 8' preserveAspectRatio='none'%3E%3Cpath d='M0 5.2 C 40 6.5, 90 3.6, 140 5.1 S 240 6.8, 290 4.4 S 370 5.9, 400 4.8' stroke='%231e293b' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x;
     background-size: 400px 6px;
   }
 
@@ -188,7 +181,7 @@
   .btn:disabled { opacity: .35; cursor: not-allowed; background: var(--paper-raised); color: var(--ink); }
 
   .btn-primary { background: var(--ink); color: var(--paper-raised); }
-  .btn-primary:hover { background: #000; }
+  .btn-primary:hover { background: #0f172a; }
   .btn-primary:disabled { background: var(--line-strong); border-color: var(--line-strong); color: var(--paper-raised); opacity: .6; }
 
   .btn-ghost { border-color: var(--line-strong); }
@@ -231,7 +224,7 @@
     color: var(--ink-soft);
   }
   .tier-total.ok { color: #2f6b3a; }
-  .tier-total.bad { color: var(--stamp-red); }
+  .tier-total.bad { color: var(--error); }
 
   /* 추첨 진행 */
   .progress-line {
@@ -321,7 +314,7 @@
 
   .error-banner {
     border-left: 3px solid var(--error);
-    background: var(--stamp-red-soft);
+    background: rgba(190, 18, 60, .08);
     color: var(--error);
     padding: 12px 16px;
     font-size: 13px;
@@ -371,7 +364,6 @@
 <div class="doc">
 
   <div class="masthead">
-    <img class="logo" src="data:image/webp;base64,UklGRlQCAABXRUJQVlA4IEgCAADQFACdASqAAIAAP3Gsz1+0rKmlpZLsEpAuCUAK9svcPvU6Jfdmq0jywAClBOxH80ulDObkacP0459zMPWL8HKEkOO9BbQY3fUO5YZBi7Qaoo7QvXm1ipwJ6R05Vz+Jn35AddNcIFh5YFMsbFEg4opbxDxl8tiPVU7l91JFtZeEZisVd/3rpf8d/6lyW9qqVZ9nRXqqSr6ZqekutvWoX7WU/wlEo7UfPMB4qCqgWIQwAP7u5ICH3JUMmb3qtZqStANJEfuEo++PGlISawLB9u6dPPTW+TBpz3A7+Iz8ibF9niTzhHGHR1d/cJKIR5c7AToy5nyxP5WizQ4taEMdEVxwHWHqXsZClPGAc7mnZ+L+7ie2MrXT8Ic+xrq0HkaZ3WW5aMxOumUYb3WLOBnWG1+IVwQf0mKYdYRyQ2tHgj2KTOP2yRn+gctR9cJCcjjcYlkCvuPlD4383dnt3N1CgKIhKJkSB+PFVTtKpISlH2ByvoMIok5sHvHqOZKkbRUnRPD1gQY2gKwnZpMRcX0CrR7WVEAPXE1As83Bl2IhIirLDxF0l7QAwUQwID2U2kfMAOxgvw3TlJpdnpn4pLjePqV6AErxLRKR3QJk2ylKfwXTXwdAle8MM86JWOP/cTA2DuJpvhBuhlTIx4n+Wl9ZdMM2KhO5TmAAhgaA4u6wJgUBPN5+6ruiUGiyCppeMqWxUI6DA6RPli3oK6QM6ElKtEmxFoObH0tALsR0IR3txeBZMxNo0QdSPiHUjTfw+HupdldAP24lgAAAAA==" alt="logo">
     <div class="title-block">
       <h1>무작위 추첨</h1>
       <div class="sub">Web Crypto API 이용 추첨</div>
