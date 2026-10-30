@@ -359,6 +359,22 @@
   }
 
 </style>
+<style>
+html[data-theme="dark"]{color-scheme:dark;--paper:#0f172a;--paper-raised:#1e293b;--line:#334155;--line-strong:#475569;--ink:#e2e8f0;--ink-soft:#cbd5e1;--ink-faint:#94a3b8;--stamp-red:#60a5fa;--stamp-red-soft:rgba(96,165,250,.14);--gold:#93c5fd;--gold-soft:rgba(147,197,253,.12);--error:#fb7185}
+html[data-theme="dark"] body{background:var(--paper)}
+html[data-theme="dark"] .btn-primary:hover{background:#3b82f6}
+html[data-theme="dark"] .tier-total.ok{color:#7bd389}
+#theme-toggle{position:fixed;right:10px;bottom:10px;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;font:14px/26px system-ui,sans-serif;text-align:center;cursor:pointer;opacity:.28;z-index:2147483000;transition:opacity .15s}
+#theme-toggle:hover,#theme-toggle:focus-visible{opacity:.85}
+@media print{#theme-toggle{display:none}}
+</style>
+<script>
+(function(){var r=document.documentElement,m=matchMedia('(prefers-color-scheme: dark)');
+function saved(){try{var s=localStorage.getItem('theme');return s==='light'||s==='dark'?s:null}catch(e){return null}}
+function apply(){r.dataset.theme=saved()||(m.matches?'dark':'light')}
+apply();m.addEventListener('change',apply);
+window.__toggleTheme=function(){var n=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('theme',n)}catch(e){}r.dataset.theme=n}})();
+</script>
 </head>
 <body>
 <div class="doc">
@@ -939,5 +955,6 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(url);
 }
 </script>
+<button id="theme-toggle" type="button" aria-label="다크 모드 전환" title="다크 모드 전환" onclick="__toggleTheme()">◐</button>
 </body>
 </html>
